@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HDHomeRun Signal Monitor</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h4l3-8 4 16 3-8h6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>HDHomeRun Signal Monitor</span>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="monitor" aria-selected="true">1 &nbsp;Monitor</button>
+    <button role="tab" data-tab="analyze" aria-selected="false">2 &nbsp;Analyze</button>
+    <button role="tab" data-tab="help" aria-selected="false">Help</button>
+  </nav>
+  <div id="devpill" class="pill" title="The HDHomeRun this page is talking to"><span class="dot"></span><span id="devtext">Looking for HDHomeRun…</span></div>
+</header>
+
+<div id="banner" class="banner" hidden></div>
+
+<!-- ============================ MONITOR ============================ -->
+<main id="tab-monitor" class="page">
+
+  <section class="card" id="card-device" hidden>
+    <h2>Connect to your HDHomeRun</h2>
+    <p class="sub">We couldn't find it automatically. Type its IP address (it's shown in the HDHomeRun app or your router's device list).</p>
+    <div class="row">
+      <input id="ip-input" class="text" placeholder="for example 192.168.1.50" inputmode="decimal" autocomplete="off">
+      <button id="ip-save" class="btn">Connect</button>
+      <button id="ip-find" class="btn ghost">Search again</button>
+    </div>
+    <p id="ip-msg" class="msg"></p>
+  </section>
+
+  <section class="card" id="card-channels">
+    <div class="card-head">
+      <div>
+        <h2>Step 1 · Choose the channels to watch</h2>
+        <p class="sub" id="chan-sub">Tick one or more. Each channel uses one tuner while recording.</p>
+      </div>
+      <div class="row tight">
+        <input id="chan-filter" class="text small" placeholder="Search channels" aria-label="Search channels">
+        <label class="check small"><input type="checkbox" id="chan-all"> Favorites only (★)</label>
+      </div>
+    </div>
+    <div id="chan-selected" class="selected-strip"></div>
+    <div id="chan-list" class="chan-list" role="group" aria-label="Channels"></div>
+  </section>
+
+  <section class="card" id="card-record">
+    <h2>Step 2 · Record</h2>
+    <div id="rec-idle">
+      <div class="row">
+        <label class="field">Name (optional)<input id="rec-label" class="text" maxlength="60" placeholder="e.g. Sunday evening news"></label>
+        <label class="field">Stop automatically after
+          <select id="rec-hours" class="text">
+            <option value="0">I'll press Stop</option>
+            <option value="0.5">30 minutes</option>
+            <option value="1">1 hour</option>
+            <option value="2">2 hours</option>
+            <option value="4">4 hours</option>
+            <option value="8">8 hours</option>
+            <option value="24">24 hours</option>
+          </select>
+        </label>
+        <button id="btn-record" class="btn record" disabled><span class="rdot"></span> Record</button>
+      </div>
+      <p id="rec-hint" class="hint">Pick at least one channel above. While recording, keep this page open and the computer plugged in.</p>
+      <p id="rec-msg" class="msg"></p>
+    </div>
+
+    <div id="rec-active" hidden>
+      <div class="rec-bar">
+        <div class="rec-status"><span class="rdot live"></span><b>Recording</b><span id="rec-timer" class="timer">00:00:00</span><span id="rec-name" class="muted"></span></div>
+        <button id="btn-stop" class="btn stop">■ Stop</button>
+      </div>
+      <div class="mark-box">
+        <div class="mark-title">See a problem on your TV? Press the button <u>the moment you see it</u> — the report will check exactly what happened then.</div>
+        <div class="row mark-row">
+          <label class="field inline" id="mark-ch-wrap">Watching channel
+            <select id="mark-ch" class="text small"></select>
+          </label>
+          <button class="btn mark" data-kind="pixelation">▦ Picture is pixelated</button>
+          <button class="btn mark ghost" data-kind="freeze">❚❚ Picture froze</button>
+          <button class="btn mark ghost" data-kind="audio">♪ Sound dropped out</button>
+        </div>
+        <div id="mark-log" class="mark-log"></div>
+      </div>
+    </div>
+
+    <div id="rec-done" class="done" hidden>
+      <span id="done-text"></span>
+      <button id="btn-analyze-last" class="btn">Analyze this recording →</button>
+    </div>
+  </section>
+
+  <section class="card" id="card-live">
+    <div class="card-head">
+      <h2>Live readings</h2>
+      <span class="muted small" id="live-sub"></span>
+    </div>
+    <div id="live-tiles" class="tiles"></div>
+    <div id="rec-messages" class="messages"></div>
+    <details class="tuners" open>
+      <summary>All tuners on the HDHomeRun right now</summary>
+      <table class="tbl" id="tuner-table"><thead><tr><th>Tuner</th><th>Channel</th><th>Strength</th><th>Quality</th><th>Symbol</th><th>Rate reported by device</th><th>Used by</th></tr></thead><tbody></tbody></table>
+      <p class="hint">This list shows everything the HDHomeRun is doing — including the Tablo/DVR or other TVs — even when you're not recording.</p>
+    </details>
+  </section>
+</main>
+
+<!-- ============================ ANALYZE ============================ -->
+<main id="tab-analyze" class="page" hidden>
+  <div class="analyze-grid">
+    <aside class="card side" id="sess-card">
+      <div class="card-head"><h2>Your recordings</h2><button id="sess-refresh" class="btn ghost small">Refresh</button></div>
+      <div id="sess-list" class="sess-list"></div>
+    </aside>
+    <section id="report" class="report">
+      <div class="card empty" id="report-empty">
+        <h2>Pick a recording on the left</h2>
+        <p class="sub">Then you'll see a plain-English verdict, the moments you marked, and detailed graphs of signal strength, signal quality, video data rate and stream errors.</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ============================ HELP ============================ -->
+<main id="tab-help" class="page" hidden>
+  <section class="card prose">
+    <h2>How to use this</h2>
+    <ol>
+      <li><b>Monitor tab → tick the channel(s)</b> that have the problem (for example CBS 38.1 and 42.2).</li>
+      <li>Press <b>Record</b>. Watch TV normally, on your TV or Tablo, as you always do.</li>
+      <li>Whenever the picture breaks up, press <b>Picture is pixelated</b> (or <b>froze</b> / <b>sound dropped</b>). Do it right when it happens.</li>
+      <li>Press <b>Stop</b> when you've seen a few problems, or let it run for a few hours.</li>
+      <li>Open the <b>Analyze</b> tab, pick the recording. The top card says in plain English what the data points to.</li>
+    </ol>
+    <h3>What the numbers mean</h3>
+    <ul>
+      <li><b>Signal strength</b>: how much radio power the antenna delivers. Low = antenna, cable, or distance problem. Above about 60% is comfortable.</li>
+      <li><b>Signal quality / symbol quality</b>: how cleanly the tuner can decode that signal. Should sit at 100%. Drops while strength is fine usually mean interference or reflections (multipath).</li>
+      <li><b>Data rate (Mbps)</b>: the video actually received by this computer from the HDHomeRun.</li>
+      <li><b>Lost packets / stalls</b>: video data that went missing or paused on the way from the HDHomeRun to this computer. This is a <i>network</i> symptom, not an antenna one.</li>
+    </ul>
+    <h3>Good to know</h3>
+    <ul>
+      <li>Each recorded channel occupies one of the HDHomeRun's tuners. If the Tablo or another TV needs every tuner, a channel there could fail while you record — keep recordings to the channels you need.</li>
+      <li>This page measures the path <i>antenna → HDHomeRun → this computer</i>. If the pixelation is on a different device (Tablo, TV) and everything here looks perfect, the problem is downstream of that point.</li>
+      <li>Your recordings are saved on this computer in the <code>data/sessions</code> folder inside the monitor folder. Nothing is sent over the internet.</li>
+      <li>Keep the Terminal window running. Closing it stops the monitor. The computer is kept awake while recording.</li>
+    </ul>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

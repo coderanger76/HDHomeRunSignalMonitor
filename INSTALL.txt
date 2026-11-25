@@ -1,0 +1,121 @@
+HDHOMERUN SIGNAL MONITOR - INSTALL AND USE GUIDE
+=================================================
+
+What this is
+------------
+A small program that runs on this Mac (nothing goes over the internet). It watches your HDHomeRun's
+signal while you watch TV, lets you press a button whenever the picture pixelates, and then draws
+graphs that show WHY: a weak/dirty antenna signal, lost video data on the home network, or nothing
+at all (which means the problem is further down the line, e.g. in the TV/Tablo).
+
+Requirements: a Mac on the same home network as the HDHomeRun, with an internet connection ONLY for
+the one-time download of Apple's developer tools (step 2). Nothing else needs installing.
+
+Everything below is typed into the Terminal app. To copy a command: select the grey line, copy it,
+click in the Terminal window, paste (Cmd+V) and press Return. Type only the command, not the "$".
+
+
+STEP 1 - Download it
+--------------------
+On the GitHub page click the green "Code" button > "Download ZIP". It lands in your Downloads folder
+as hdhr-monitor-main.zip (or whatever the repository is called).
+
+
+STEP 2 - Open Terminal and make sure Python is present
+------------------------------------------------------
+Press Cmd+Space, type  Terminal  and press Return. Then run:
+
+    python3 --version
+
+* If it prints something like "Python 3.9.6" (any 3.x), go to Step 3.
+* If a pop-up appears saying "The 'python3' command requires the command line developer tools":
+  click "Install", agree to the licence, and wait until it says the install finished (5-15 minutes).
+  Then run  python3 --version  again; it should now print a version number.
+  (If no pop-up appears, run:  xcode-select --install )
+
+
+STEP 3 - Unpack the program
+---------------------------
+    cd ~/Downloads
+    unzip -o hdhr-monitor-main.zip -d ~
+    mv ~/hdhr-monitor-main ~/hdhr-monitor
+    xattr -dr com.apple.quarantine ~/hdhr-monitor
+    chmod +x ~/hdhr-monitor/start.sh ~/hdhr-monitor/server.py "$HOME/hdhr-monitor/Start Monitor.command"
+
+This creates a folder called  hdhr-monitor  in your home folder. (The xattr line removes the
+"downloaded from the internet" flag so macOS doesn't block it.)
+
+
+STEP 4 - Start it
+-----------------
+    cd ~/hdhr-monitor
+    ./start.sh
+
+You should see "HDHomeRun: HDHomeRun FLEX 4K at 192.168.x.x" and then
+"HDHomeRun Signal Monitor is running." Safari opens by itself showing the monitor page.
+If Safari does not open, open Safari and go to:   http://localhost:8787
+
+IMPORTANT - the "local network" permission:
+The first time, macOS asks: "Terminal would like to find and connect to devices on your local
+network." Click ALLOW. If you clicked "Don't Allow" by accident: System Settings > Privacy & Security
+> Local Network > turn Terminal ON, then stop the monitor (Ctrl+C in Terminal) and start it again.
+
+Leave the Terminal window open while you use the monitor. Closing it (or pressing Ctrl+C) stops it.
+
+
+STEP 5 - Using it
+-----------------
+1. "Monitor" tab -> tick the channel(s) with the problem (use the search box; e.g. 38.1 and 42.2).
+2. Press the red RECORD button. Watch TV as you normally do, on the TV / Tablo.
+3. Every time the picture breaks up, press the yellow "Picture is pixelated" button (or tap the
+   SPACE BAR). If the picture freezes or the sound drops, use those buttons instead.
+4. After a few problems have happened (or after a few hours), press STOP.
+5. Press "Analyze this recording". Read the coloured box at the top: it says in plain English what
+   the data points to. Scroll down for the graphs; drag across a graph to zoom in.
+6. "Download data (CSV)" saves the numbers; "Print / save as PDF" saves the report.
+
+Tips
+- Recording uses one HDHomeRun tuner per channel you tick. If another TV/Tablo needs every tuner at
+  the same moment, keep it to the channels you need.
+- The Mac is kept awake while recording. Keep it plugged in. A wired (Ethernet) connection to the
+  router gives the cleanest measurements; the report tells you if the Mac was on Wi-Fi.
+- Several hours of recording make the best evidence, especially in the evening when it usually fails.
+
+
+STEP 6 - Sending the results back
+---------------------------------
+To share your recordings, in Terminal run:
+
+    cd ~/hdhr-monitor
+    zip -r ~/Desktop/hdhr-recordings.zip data/sessions
+
+Then email  hdhr-recordings.zip  from the Desktop. (Or just use the CSV / PDF buttons on the report.)
+
+
+NEXT TIME
+---------
+    cd ~/hdhr-monitor && ./start.sh
+
+Or in Finder open the hdhr-monitor folder and double-click  "Start Monitor.command"
+(the very first time: right-click it > Open > Open).
+
+
+TROUBLESHOOTING
+---------------
+* "No HDHomeRun found" / the top-right says it can't reach the device:
+  type its IP address into the box on the page (the HDHomeRun app or the router's device list
+  shows it). Check the Local Network permission (Step 4).
+* "Can't start on port 8787": the monitor is already running in another Terminal window. Just open
+  http://localhost:8787 in Safari. To use a different port:  ./start.sh --port 8800
+* Page says "Lost contact with the monitor program": the Terminal window was closed or the Mac slept.
+  Start it again (NEXT TIME, above). Recordings already saved are kept.
+* "all tuners are busy": the Tablo/DVR/TVs are using the HDHomeRun's tuners. Try again later or
+  tick fewer channels.
+* To remove everything: quit the monitor, then run   rm -rf ~/hdhr-monitor
+
+
+WHAT IS ON DISK
+---------------
+~/hdhr-monitor/data/sessions/   one folder per recording (samples.csv = one row per channel per second)
+Nothing is uploaded anywhere. The program only talks to the HDHomeRun on your home network and only
+accepts connections from this Mac itself.
