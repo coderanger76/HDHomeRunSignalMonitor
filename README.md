@@ -32,7 +32,7 @@ The screenshots use the bundled **synthetic** demo recording (`python3 tools/mak
 Needs Python 3.8 or newer (macOS: `xcode-select --install` provides it) and a computer on the same network as the HDHomeRun.
 
 ```sh
-git clone <this repo> hdhr-monitor
+git clone https://github.com/coderanger76/HDHomeRunSignalMonitor.git hdhr-monitor
 cd hdhr-monitor
 ./start.sh            # opens http://localhost:8787
 ```
