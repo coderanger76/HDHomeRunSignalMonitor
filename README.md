@@ -67,7 +67,7 @@ The first 4 seconds after a tuner locks are ignored (readings settle during lock
 ## Limitations
 
 - Measures *antenna → HDHomeRun → this computer*. It cannot see what happens inside a TV or DVR.
-- Primarily tested on macOS with Python 3.9 and Chrome. Safari should work but has had less testing; the printed landscape layout may be ignored by Safari.
+- Works in Chrome and Safari. Developed on macOS with Python 3.9. Safari may ignore the landscape page setting when printing; choose landscape in the print dialog if so.
 - HDHomeRun only. Other tuner boxes are not supported (yet).
 
 ## License
